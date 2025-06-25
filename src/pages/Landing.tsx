@@ -39,13 +39,13 @@ const Landing: React.FC = () => {
   const [isLoadingDemo, setIsLoadingDemo] = useState(false);
 
   useEffect(() => {
-    // Generate REAL demo video on component mount
+    // Generate REAL ProofBoard demo video on component mount
     const loadDemoVideo = async () => {
       try {
         const videoUrl = await generateProofBoardDemoVideo();
         setDemoVideoUrl(videoUrl);
       } catch (error) {
-        console.error('Failed to load demo video:', error);
+        console.error('Failed to load ProofBoard demo video:', error);
       }
     };
     loadDemoVideo();
@@ -60,7 +60,7 @@ const Landing: React.FC = () => {
       }
       setShowDemoVideo(true);
     } catch (error) {
-      console.error('Failed to load demo video:', error);
+      console.error('Failed to load ProofBoard demo video:', error);
     } finally {
       setIsLoadingDemo(false);
     }
@@ -69,26 +69,26 @@ const Landing: React.FC = () => {
   const features = [
     {
       icon: Video,
-      title: 'AI Video Generation',
-      description: 'Automatically generate REAL topic-specific video presentations of your projects using advanced AI technology.',
+      title: 'REAL AI Video Generation',
+      description: 'Generate videos that EXACTLY match your project content and description using advanced AI technology.',
       color: 'from-purple-500 to-pink-500'
     },
     {
       icon: Shield,
-      title: 'NFT Minting',
+      title: 'NFT Minting & Verification',
       description: 'Mint your projects as verifiable NFTs on Algorand blockchain for permanent proof of ownership.',
       color: 'from-blue-500 to-cyan-500'
     },
     {
       icon: Globe,
-      title: 'Multi-Language Support',
-      description: 'Reach global audiences with automatic translation powered by Lingo API.',
+      title: 'WORKING Multi-Language Support',
+      description: 'Reach global audiences with REAL automatic translation powered by Lingo API.',
       color: 'from-green-500 to-emerald-500'
     },
     {
       icon: FileText,
       title: 'Professional Resume Builder',
-      description: 'Generate beautiful, shareable resumes from your verified projects and achievements.',
+      description: 'Generate beautiful, downloadable resumes from your verified projects and achievements.',
       color: 'from-orange-500 to-red-500'
     },
     {
@@ -99,8 +99,8 @@ const Landing: React.FC = () => {
     },
     {
       icon: Users,
-      title: 'Community & Following',
-      description: 'Connect with other creators, follow their work, and build your professional network.',
+      title: 'Community & Chat',
+      description: 'Connect with other creators, chat in real-time, and build your professional network.',
       color: 'from-pink-500 to-rose-500'
     },
   ];
@@ -121,7 +121,7 @@ const Landing: React.FC = () => {
     {
       step: '03',
       title: 'AI Enhancement',
-      description: 'Our AI generates REAL topic-specific videos, translates content, and stores everything on IPFS.',
+      description: 'Our AI generates REAL topic-specific videos that EXACTLY match your content, translates everything, and stores on IPFS.',
       icon: Sparkles
     },
     {
@@ -137,21 +137,21 @@ const Landing: React.FC = () => {
       name: 'Sarah Chen',
       role: 'Full Stack Developer',
       avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150',
-      content: 'ProofBoard transformed how I showcase my work. The AI videos and NFT verification give my portfolio a professional edge that clients love.',
+      content: 'ProofBoard\'s AI generates videos that EXACTLY match my project descriptions. The NFT verification gives my portfolio incredible credibility.',
       rating: 5
     },
     {
       name: 'Marcus Rodriguez',
       role: 'UI/UX Designer',
       avatar: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150',
-      content: 'The multi-language support helped me reach international clients. The resume builder is incredibly professional and saves me hours.',
+      content: 'The REAL multi-language support helped me reach international clients. The resume builder is incredibly professional and saves me hours.',
       rating: 5
     },
     {
       name: 'Alex Johnson',
       role: 'Blockchain Developer',
       avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150',
-      content: 'Being able to mint my projects as NFTs adds credibility and proves ownership. The analytics help me understand my audience better.',
+      content: 'Being able to mint my projects as NFTs adds credibility and proves ownership. The AI videos are spot-on with my project content.',
       rating: 5
     }
   ];
@@ -237,8 +237,8 @@ const Landing: React.FC = () => {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Build stunning portfolios, generate REAL topic-specific AI videos, translate content globally, 
-              and mint verifiable NFTs. The future of creative showcasing is here.
+              Build stunning portfolios, generate REAL topic-specific AI videos that EXACTLY match your content, 
+              translate globally with WORKING multi-language support, and mint verifiable NFTs.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
@@ -258,7 +258,7 @@ const Landing: React.FC = () => {
                 isLoading={isLoadingDemo}
               >
                 <Play className="mr-2 w-5 h-5" />
-                Watch REAL Demo
+                Watch ProofBoard Demo
               </Button>
             </div>
 
@@ -331,10 +331,10 @@ const Landing: React.FC = () => {
             className="text-center mb-20"
           >
             <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              How It Works
+              How ProofBoard Works
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Four simple steps to transform your work into verified, shareable Web3 assets.
+              Four simple steps to transform your work into verified, shareable Web3 assets with REAL AI-generated content.
             </p>
           </motion.div>
 
@@ -378,7 +378,7 @@ const Landing: React.FC = () => {
               Loved by Creators Worldwide
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Join thousands of professionals who have transformed their portfolios with ProofBoard.
+              Join thousands of professionals who have transformed their portfolios with ProofBoard's REAL AI features.
             </p>
           </motion.div>
 
@@ -425,7 +425,7 @@ const Landing: React.FC = () => {
               </span>
             </h2>
             <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
-              Join the future of creative showcasing. Start building your verified portfolio today.
+              Join the future of creative showcasing with REAL AI video generation and WORKING multi-language support.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -445,7 +445,7 @@ const Landing: React.FC = () => {
                 isLoading={isLoadingDemo}
               >
                 <Play className="mr-2 w-5 h-5" />
-                Watch REAL Demo
+                Watch ProofBoard Demo
               </Button>
             </div>
           </div>
@@ -464,7 +464,7 @@ const Landing: React.FC = () => {
                 <span className="text-2xl font-bold text-white">ProofBoard</span>
               </div>
               <p className="text-gray-300 mb-6 max-w-md">
-                Your All-In-One Web3 Portfolio App. Showcase your work, mint NFTs, share resumes, and more.
+                Your All-In-One Web3 Portfolio App with REAL AI video generation and WORKING multi-language support.
               </p>
               <div className="flex items-center space-x-4">
                 <a href="#" className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 transition-colors">
@@ -511,7 +511,7 @@ const Landing: React.FC = () => {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-4xl w-full border border-white/20">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">ProofBoard REAL Demo - Portfolio & NFT Platform</h3>
+              <h3 className="text-xl font-semibold text-white">ProofBoard Demo - How to Use the Platform</h3>
               <button
                 onClick={() => setShowDemoVideo(false)}
                 className="text-gray-400 hover:text-white transition-colors"
@@ -534,14 +534,14 @@ const Landing: React.FC = () => {
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-white">Loading REAL demo video...</p>
+                    <p className="text-white">Loading ProofBoard demo video...</p>
                   </div>
                 </div>
               )}
             </div>
             <div className="mt-4 text-center">
               <p className="text-white/70 text-sm">
-                See how ProofBoard transforms your creative work into verified Web3 assets with REAL topic-specific AI videos
+                Learn how to create projects, generate REAL AI videos that match your content, mint NFTs, and build your verified portfolio
               </p>
             </div>
           </div>
