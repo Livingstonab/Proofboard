@@ -20,6 +20,12 @@ import Analytics from './pages/Analytics';
 import Resume from './pages/Resume';
 import Premium from './pages/Premium';
 import Settings from './pages/Settings';
+import Profile from './pages/Profile';
+import Explore from './pages/Explore';
+
+// Onboarding Components
+import OnboardingModal from './components/Onboarding/OnboardingModal';
+import WelcomeModal from './components/Onboarding/WelcomeModal';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -42,6 +48,33 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 // Dashboard Layout Component
 const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  const [showOnboarding, setShowOnboarding] = React.useState(false);
+  const [showWelcome, setShowWelcome] = React.useState(false);
+  const [onboardingData, setOnboardingData] = React.useState(null);
+
+  React.useEffect(() => {
+    if (user) {
+      // Check if user has completed onboarding
+      const savedOnboarding = localStorage.getItem('proofmint_onboarding');
+      const hasCompletedOnboarding = savedOnboarding && JSON.parse(savedOnboarding).userId === user.id;
+      
+      if (!hasCompletedOnboarding) {
+        setShowOnboarding(true);
+      }
+    }
+  }, [user]);
+
+  const handleOnboardingComplete = (data: any) => {
+    setOnboardingData(data);
+    setShowOnboarding(false);
+    setShowWelcome(true);
+  };
+
+  const handleWelcomeComplete = () => {
+    setShowWelcome(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Sidebar />
@@ -49,6 +82,19 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
       <main className="ml-64 mt-16 min-h-screen">
         {children}
       </main>
+
+      {/* Onboarding Modals */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={handleOnboardingComplete}
+      />
+      
+      <WelcomeModal
+        isOpen={showWelcome}
+        onClose={handleWelcomeComplete}
+        onboardingData={onboardingData}
+      />
     </div>
   );
 };
@@ -76,6 +122,9 @@ const App: React.FC = () => {
               
               {/* Public Project View (for shared links) */}
               <Route path="/project/:id" element={<PublicProjectView />} />
+              
+              {/* Public Profile View */}
+              <Route path="/profile/:username" element={<Profile />} />
 
               {/* Protected Dashboard Routes */}
               <Route
@@ -167,20 +216,22 @@ const App: React.FC = () => {
               />
               
               <Route
+                path="/dashboard/profile"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <Profile />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/dashboard/explore"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
-                      <div className="p-6">
-                        <div className="bg-white/20 dark:bg-gray-900/20 backdrop-blur-md rounded-xl p-8 border border-white/20 dark:border-gray-700/20 text-center">
-                          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                            Explore Projects
-                          </h2>
-                          <p className="text-gray-600 dark:text-gray-400">
-                            Discover amazing projects from the ProofMint community.
-                          </p>
-                        </div>
-                      </div>
+                      <Explore />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
