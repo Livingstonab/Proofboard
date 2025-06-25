@@ -70,6 +70,7 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
   const [profileData, setProfileData] = useState<ProfileData>({
     fullName: user?.name || '',
     bio: '',
@@ -96,7 +97,7 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     // Load profile data
-    const savedProfile = localStorage.getItem(`proofmint_profile_${user?.id}`);
+    const savedProfile = localStorage.getItem(`proofboard_profile_${user?.id}`);
     if (savedProfile) {
       try {
         const parsed = JSON.parse(savedProfile);
@@ -107,7 +108,7 @@ const Profile: React.FC = () => {
     }
 
     // Load user's projects
-    const savedProjects = localStorage.getItem('proofmint_projects');
+    const savedProjects = localStorage.getItem('proofboard_projects');
     if (savedProjects && user) {
       try {
         const allProjects = JSON.parse(savedProjects);
@@ -117,10 +118,22 @@ const Profile: React.FC = () => {
         console.error('Failed to parse projects:', error);
       }
     }
+
+    // Load user's posts
+    const savedPosts = localStorage.getItem('proofboard_posts');
+    if (savedPosts && user) {
+      try {
+        const allPosts = JSON.parse(savedPosts);
+        const userPosts = allPosts.filter((p: any) => p.userId === user.id && p.visibility === 'public');
+        setPosts(userPosts);
+      } catch (error) {
+        console.error('Failed to parse posts:', error);
+      }
+    }
   }, [user]);
 
   const handleSaveProfile = () => {
-    localStorage.setItem(`proofmint_profile_${user?.id}`, JSON.stringify(profileData));
+    localStorage.setItem(`proofboard_profile_${user?.id}`, JSON.stringify(profileData));
     toast.success('Profile saved successfully!');
     setIsEditing(false);
   };
@@ -331,86 +344,18 @@ const Profile: React.FC = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {posts.length}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Posts</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
                       {profileData.followers}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Followers</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {profileData.following}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Following</div>
-                  </div>
                 </div>
               </div>
-            </Card>
-
-            {/* Professional Info */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Professional Info
-              </h3>
-              
-              {isEditing ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Tech Category
-                    </label>
-                    <select
-                      value={profileData.techCategory}
-                      onChange={(e) => setProfileData({ ...profileData, techCategory: e.target.value })}
-                      className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white"
-                    >
-                      <option value="">Select category</option>
-                      {techCategories.map(category => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Skill Level
-                    </label>
-                    <select
-                      value={profileData.skillLevel}
-                      onChange={(e) => setProfileData({ ...profileData, skillLevel: e.target.value })}
-                      className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white"
-                    >
-                      <option value="">Select level</option>
-                      {skillLevels.map(level => (
-                        <option key={level} value={level}>{level}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {profileData.techCategory && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Category:</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {profileData.techCategory}
-                      </span>
-                    </div>
-                  )}
-                  {profileData.skillLevel && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Level:</span>
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {profileData.skillLevel}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Joined:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {new Date(user?.createdAt || '').toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              )}
             </Card>
 
             {/* Contact & Social */}
@@ -421,34 +366,6 @@ const Profile: React.FC = () => {
               
               {isEditing ? (
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Contact Preference
-                    </label>
-                    <div className="flex space-x-4">
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          value="email"
-                          checked={profileData.contactPreference === 'email'}
-                          onChange={(e) => setProfileData({ ...profileData, contactPreference: e.target.value as 'email' })}
-                          className="text-purple-600 focus:ring-purple-500"
-                        />
-                        <span className="ml-2 text-gray-700 dark:text-gray-300">Email</span>
-                      </label>
-                      <label className="flex items-center">
-                        <input
-                          type="radio"
-                          value="whatsapp"
-                          checked={profileData.contactPreference === 'whatsapp'}
-                          onChange={(e) => setProfileData({ ...profileData, contactPreference: e.target.value as 'whatsapp' })}
-                          className="text-purple-600 focus:ring-purple-500"
-                        />
-                        <span className="ml-2 text-gray-700 dark:text-gray-300">WhatsApp</span>
-                      </label>
-                    </div>
-                  </div>
-
                   <Input
                     label="Email"
                     type="email"
@@ -543,32 +460,6 @@ const Profile: React.FC = () => {
               )}
             </Card>
 
-            {/* Privacy Settings */}
-            {isOwnProfile && (
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Privacy Settings
-                </h3>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white">Public Profile</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Allow others to view your profile
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={profileData.isPublic}
-                      onChange={(e) => setProfileData({ ...profileData, isPublic: e.target.checked })}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
-                  </label>
-                </div>
-              </Card>
-            )}
-
             {isEditing && (
               <Button onClick={handleSaveProfile} className="w-full">
                 <Save className="w-4 h-4 mr-2" />
@@ -577,7 +468,7 @@ const Profile: React.FC = () => {
             )}
           </div>
 
-          {/* Right Column - Projects & Resume */}
+          {/* Right Column - Projects & Posts */}
           <div className="lg:col-span-2 space-y-6">
             {/* Projects */}
             <Card className="p-6">
@@ -682,91 +573,63 @@ const Profile: React.FC = () => {
               )}
             </Card>
 
-            {/* Other Projects */}
-            {(isEditing || profileData.otherProjects.length > 0) && (
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Other Projects
-                  </h3>
-                  {isEditing && (
-                    <Button size="sm" onClick={addOtherProject}>
-                      Add Project
+            {/* Posts */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Posts ({posts.length})
+                </h3>
+                {isOwnProfile && (
+                  <Link to="/dashboard/create-post">
+                    <Button size="sm">
+                      <Edit className="w-4 h-4 mr-2" />
+                      Create Post
                     </Button>
+                  </Link>
+                )}
+              </div>
+
+              {posts.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No posts yet
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    {isOwnProfile ? 'Share your thoughts and updates with the community.' : 'This user hasn\'t posted anything yet.'}
+                  </p>
+                  {isOwnProfile && (
+                    <Link to="/dashboard/create-post">
+                      <Button>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Create Your First Post
+                      </Button>
+                    </Link>
                   )}
                 </div>
-
-                {isEditing ? (
-                  <div className="space-y-4">
-                    {profileData.otherProjects.map((project, index) => (
-                      <div key={project.id} className="p-4 bg-white/10 rounded-lg">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <Input
-                            label="Project Title"
-                            value={project.title}
-                            onChange={(e) => {
-                              const updated = [...profileData.otherProjects];
-                              updated[index].title = e.target.value;
-                              setProfileData({ ...profileData, otherProjects: updated });
-                            }}
-                          />
-                          <Input
-                            label="Project URL"
-                            value={project.url}
-                            onChange={(e) => {
-                              const updated = [...profileData.otherProjects];
-                              updated[index].url = e.target.value;
-                              setProfileData({ ...profileData, otherProjects: updated });
-                            }}
-                          />
+              ) : (
+                <div className="space-y-4">
+                  {posts.slice(0, 3).map((post) => (
+                    <div key={post.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                      <p className="text-gray-900 dark:text-white mb-2">{post.content}</p>
+                      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center space-x-4">
+                          <span className="flex items-center">
+                            <Heart className="w-4 h-4 mr-1" />
+                            {post.likes}
+                          </span>
+                          <span className="flex items-center">
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                            {post.comments}
+                          </span>
                         </div>
-                        <textarea
-                          className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                          rows={2}
-                          placeholder="Project description..."
-                          value={project.description}
-                          onChange={(e) => {
-                            const updated = [...profileData.otherProjects];
-                            updated[index].description = e.target.value;
-                            setProfileData({ ...profileData, otherProjects: updated });
-                          }}
-                        />
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => removeOtherProject(project.id)}
-                          className="mt-2"
-                        >
-                          Remove
-                        </Button>
+                        <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {profileData.otherProjects.map((project) => (
-                      <div key={project.id} className="p-4 bg-white/10 rounded-lg">
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                          {project.title}
-                        </h4>
-                        <p className="text-gray-600 dark:text-gray-400 mb-3">
-                          {project.description}
-                        </p>
-                        <a
-                          href={project.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-600 hover:text-purple-700 text-sm flex items-center"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-1" />
-                          View Project
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
 
             {/* Resume Section */}
             <Card className="p-6">
@@ -825,29 +688,6 @@ const Profile: React.FC = () => {
                 </div>
               )}
             </Card>
-
-            {/* Additional Info */}
-            {(isEditing || profileData.otherInfo) && (
-              <Card className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Additional Information
-                </h3>
-                
-                {isEditing ? (
-                  <textarea
-                    className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                    rows={4}
-                    value={profileData.otherInfo}
-                    onChange={(e) => setProfileData({ ...profileData, otherInfo: e.target.value })}
-                    placeholder="Add any additional information about yourself..."
-                  />
-                ) : (
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {profileData.otherInfo}
-                  </p>
-                )}
-              </Card>
-            )}
           </div>
         </div>
       </div>

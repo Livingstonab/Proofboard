@@ -92,7 +92,7 @@ const Chat: React.FC = () => {
       ];
       setUsers(mockUsers);
 
-      // Load conversations
+      // Load conversations from localStorage
       const savedConversations = JSON.parse(localStorage.getItem(`proofboard_conversations_${user?.id}`) || '[]');
       if (savedConversations.length === 0) {
         // Create mock conversations
@@ -114,7 +114,7 @@ const Chat: React.FC = () => {
         setConversations(savedConversations);
       }
 
-      // Load messages
+      // Load messages from localStorage
       const savedMessages = JSON.parse(localStorage.getItem(`proofboard_messages_${user?.id}`) || '[]');
       if (savedMessages.length === 0) {
         // Create mock messages

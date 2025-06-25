@@ -12,7 +12,9 @@ import {
   FileText,
   Image as ImageIcon,
   Loader,
-  AlertCircle
+  AlertCircle,
+  ToggleLeft,
+  ToggleRight
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import Button from '../components/UI/Button';
@@ -36,6 +38,7 @@ const AddProject: React.FC = () => {
     videoMessage: '',
     language: 'en',
     isPublic: true,
+    generateVideo: true, // Video toggle
   });
 
   const [results, setResults] = useState({
@@ -130,12 +133,15 @@ const AddProject: React.FC = () => {
         toast.success('Files uploaded to IPFS successfully!');
       }
 
-      // Step 2: Generate topic-specific AI video using Tavus
-      setProcessingStep('Generating topic-specific AI video with Tavus...');
-      const videoScript = formData.videoMessage || formData.description;
-      const videoUrl = await generateTavusVideo(formData.title, videoScript, formData.category);
-      setResults(prev => ({ ...prev, videoUrl }));
-      toast.success('Topic-specific AI video generated successfully!');
+      // Step 2: Generate topic-specific AI video using Tavus (only if enabled)
+      let videoUrl = '';
+      if (formData.generateVideo) {
+        setProcessingStep('Generating topic-specific AI video with Tavus...');
+        const videoScript = formData.videoMessage || formData.description;
+        videoUrl = await generateTavusVideo(formData.title, videoScript, formData.category);
+        setResults(prev => ({ ...prev, videoUrl }));
+        toast.success('Topic-specific AI video generated successfully!');
+      }
 
       // Step 3: Translate content using Lingo
       setProcessingStep('Translating content...');
@@ -198,7 +204,7 @@ const AddProject: React.FC = () => {
         updatedAt: new Date().toISOString(),
       };
 
-      // Save to localStorage
+      // Save to localStorage with proper key
       const existingProjects = JSON.parse(localStorage.getItem('proofboard_projects') || '[]');
       const updatedProjects = [...existingProjects, newProject];
       localStorage.setItem('proofboard_projects', JSON.stringify(updatedProjects));
@@ -208,7 +214,7 @@ const AddProject: React.FC = () => {
       const updatedAnalytics = {
         ...analytics,
         totalProjects: (analytics.totalProjects || 0) + 1,
-        videosGenerated: (analytics.videosGenerated || 0) + 1,
+        videosGenerated: (analytics.videosGenerated || 0) + (formData.generateVideo ? 1 : 0),
         nftsMinted: (analytics.nftsMinted || 0) + 1,
         languagesUsed: [...new Set([...(analytics.languagesUsed || []), formData.language])],
         recentActivity: [
@@ -218,11 +224,11 @@ const AddProject: React.FC = () => {
             message: `Created project "${formData.title}"`,
             timestamp: new Date().toISOString()
           },
-          {
+          ...(formData.generateVideo ? [{
             type: 'video_generated',
             message: `AI video generated for "${formData.title}"`,
             timestamp: new Date().toISOString()
-          },
+          }] : []),
           {
             type: 'nft_minted',
             message: `NFT minted for "${formData.title}"`,
@@ -308,6 +314,27 @@ const AddProject: React.FC = () => {
                     ))}
                   </select>
                 </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Generate AI Video
+                    </label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Create a topic-specific video for your project
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, generateVideo: !formData.generateVideo })}
+                    className="flex items-center"
+                  >
+                    {formData.generateVideo ? (
+                      <ToggleRight className="w-8 h-8 text-purple-500" />
+                    ) : (
+                      <ToggleLeft className="w-8 h-8 text-gray-400" />
+                    )}
+                  </button>
+                </div>
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -390,34 +417,46 @@ const AddProject: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 AI Video Generation
               </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Custom Video Script (Optional)
-                  </label>
-                  <textarea
-                    className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                    rows={3}
-                    placeholder="Enter a custom script for your AI video, or we'll use your project description..."
-                    value={formData.videoMessage}
-                    onChange={(e) => setFormData({ ...formData, videoMessage: e.target.value })}
-                  />
-                </div>
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <div className="flex items-start space-x-3">
-                    <Video className="w-5 h-5 text-blue-500 mt-0.5" />
-                    <div>
-                      <h4 className="font-medium text-blue-900 dark:text-blue-100">
-                        Topic-Specific AI Video Generation
-                      </h4>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                        Our AI will generate a video specifically related to your project category ({formData.category || 'selected category'}) 
-                        and description. The video will be under 5 minutes and showcase content relevant to your work.
-                      </p>
+              {formData.generateVideo ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Custom Video Script (Optional)
+                    </label>
+                    <textarea
+                      className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+                      rows={3}
+                      placeholder="Enter a custom script for your AI video, or we'll use your project description..."
+                      value={formData.videoMessage}
+                      onChange={(e) => setFormData({ ...formData, videoMessage: e.target.value })}
+                    />
+                  </div>
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <Video className="w-5 h-5 text-blue-500 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                          Topic-Specific AI Video Generation
+                        </h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                          Our AI will generate a video specifically related to your project category ({formData.category || 'selected category'}) 
+                          and description. The video will be under 5 minutes and showcase content relevant to your work.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+                  <Video className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                    Video Generation Disabled
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    You've chosen to skip AI video generation for this project. You can enable it in the previous step.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -519,6 +558,10 @@ const AddProject: React.FC = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Files:</span>
                       <span className="text-gray-900 dark:text-white">{formData.files.length} file(s)</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Video:</span>
+                      <span className="text-gray-900 dark:text-white">{formData.generateVideo ? 'Yes' : 'No'}</span>
                     </div>
                   </div>
                 </div>

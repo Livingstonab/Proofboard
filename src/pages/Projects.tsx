@@ -23,8 +23,10 @@ import Card from '../components/UI/Card';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
 import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 const Projects: React.FC = () => {
+  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,83 +36,19 @@ const Projects: React.FC = () => {
 
   useEffect(() => {
     // Load projects from localStorage
-    const savedProjects = localStorage.getItem('proofmint_projects');
-    if (savedProjects) {
+    const savedProjects = localStorage.getItem('proofboard_projects');
+    if (savedProjects && user) {
       try {
         const parsedProjects = JSON.parse(savedProjects);
-        setProjects(parsedProjects);
-        setFilteredProjects(parsedProjects);
+        const userProjects = parsedProjects.filter((p: Project) => p.userId === user.id);
+        setProjects(userProjects);
+        setFilteredProjects(userProjects);
       } catch (error) {
         console.error('Failed to parse saved projects:', error);
       }
-    } else {
-      // Mock projects for demo
-      const mockProjects: Project[] = [
-        {
-          id: '1',
-          userId: '1',
-          title: 'AI-Powered Portfolio Website',
-          description: 'A modern portfolio website built with React and AI integration for dynamic content generation.',
-          thumbnail: 'https://images.pexels.com/photos/276452/pexels-photo-276452.jpeg?auto=compress&cs=tinysrgb&w=400',
-          videoUrl: 'https://example.com/video1.mp4',
-          nftId: 'NFT123456',
-          algorandTxId: 'TX789ABC',
-          isPublic: true,
-          views: 1250,
-          likes: 89,
-          createdAt: '2024-01-15T10:30:00Z',
-          updatedAt: '2024-01-15T10:30:00Z',
-        },
-        {
-          id: '2',
-          userId: '1',
-          title: 'Mobile App UI Design',
-          description: 'Complete UI/UX design for a fintech mobile application with modern glassmorphism effects.',
-          thumbnail: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=400',
-          videoUrl: 'https://example.com/video2.mp4',
-          nftId: 'NFT789123',
-          algorandTxId: 'TX456DEF',
-          isPublic: true,
-          views: 890,
-          likes: 67,
-          createdAt: '2024-01-10T14:20:00Z',
-          updatedAt: '2024-01-10T14:20:00Z',
-        },
-        {
-          id: '3',
-          userId: '1',
-          title: 'Brand Identity Package',
-          description: 'Complete brand identity design including logo, color palette, and brand guidelines.',
-          thumbnail: 'https://images.pexels.com/photos/590016/pexels-photo-590016.jpg?auto=compress&cs=tinysrgb&w=400',
-          videoUrl: 'https://example.com/video3.mp4',
-          isPublic: false,
-          views: 456,
-          likes: 34,
-          createdAt: '2024-01-05T09:15:00Z',
-          updatedAt: '2024-01-05T09:15:00Z',
-        },
-        {
-          id: '4',
-          userId: '1',
-          title: 'E-commerce Platform',
-          description: 'Full-stack e-commerce solution with payment integration and admin dashboard.',
-          thumbnail: 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg?auto=compress&cs=tinysrgb&w=400',
-          videoUrl: 'https://example.com/video4.mp4',
-          nftId: 'NFT456789',
-          algorandTxId: 'TX123GHI',
-          isPublic: true,
-          views: 2100,
-          likes: 156,
-          createdAt: '2024-01-20T16:45:00Z',
-          updatedAt: '2024-01-20T16:45:00Z',
-        },
-      ];
-      setProjects(mockProjects);
-      setFilteredProjects(mockProjects);
-      localStorage.setItem('proofmint_projects', JSON.stringify(mockProjects));
     }
     setIsLoading(false);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     let filtered = projects;
@@ -151,7 +89,12 @@ const Projects: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this project?')) {
       const updatedProjects = projects.filter(p => p.id !== projectId);
       setProjects(updatedProjects);
-      localStorage.setItem('proofmint_projects', JSON.stringify(updatedProjects));
+      
+      // Update localStorage
+      const allProjects = JSON.parse(localStorage.getItem('proofboard_projects') || '[]');
+      const updatedAllProjects = allProjects.filter((p: Project) => p.id !== projectId);
+      localStorage.setItem('proofboard_projects', JSON.stringify(updatedAllProjects));
+      
       toast.success('Project deleted successfully');
     }
   };
@@ -161,7 +104,14 @@ const Projects: React.FC = () => {
       p.id === projectId ? { ...p, likes: p.likes + 1 } : p
     );
     setProjects(updatedProjects);
-    localStorage.setItem('proofmint_projects', JSON.stringify(updatedProjects));
+    
+    // Update localStorage
+    const allProjects = JSON.parse(localStorage.getItem('proofboard_projects') || '[]');
+    const updatedAllProjects = allProjects.map((p: Project) =>
+      p.id === projectId ? { ...p, likes: p.likes + 1 } : p
+    );
+    localStorage.setItem('proofboard_projects', JSON.stringify(updatedAllProjects));
+    
     toast.success('Project liked!');
   };
 

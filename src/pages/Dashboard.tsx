@@ -15,7 +15,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     // Load user's projects from localStorage
     const loadProjects = () => {
-      const savedProjects = localStorage.getItem('proofmint_projects');
+      const savedProjects = localStorage.getItem('proofboard_projects');
       if (savedProjects && user) {
         try {
           const allProjects = JSON.parse(savedProjects);
@@ -171,6 +171,11 @@ const Dashboard: React.FC = () => {
               <Button className="flex items-center space-x-2">
                 <Plus className="w-4 h-4" />
                 <span>Add New Project</span>
+              </Button>
+            </Link>
+            <Link to="/dashboard/create-post">
+              <Button variant="outline">
+                Create Post
               </Button>
             </Link>
             <Link to="/dashboard/projects">
