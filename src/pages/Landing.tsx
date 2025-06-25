@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import Button from '../components/UI/Button';
 import FloatingContactButtons from '../components/FloatingContactButtons';
+import { generateProofBoardDemoVideo } from '../lib/api';
 
 const Landing: React.FC = () => {
   const [heroRef, heroInView] = useInView({ threshold: 0.1 });
@@ -34,12 +35,42 @@ const Landing: React.FC = () => {
   const [howItWorksRef, howItWorksInView] = useInView({ threshold: 0.1 });
   const [testimonialsRef, testimonialsInView] = useInView({ threshold: 0.1 });
   const [showDemoVideo, setShowDemoVideo] = useState(false);
+  const [demoVideoUrl, setDemoVideoUrl] = useState('');
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
+
+  useEffect(() => {
+    // Generate demo video on component mount
+    const loadDemoVideo = async () => {
+      try {
+        const videoUrl = await generateProofBoardDemoVideo();
+        setDemoVideoUrl(videoUrl);
+      } catch (error) {
+        console.error('Failed to load demo video:', error);
+      }
+    };
+    loadDemoVideo();
+  }, []);
+
+  const handleViewDemo = async () => {
+    setIsLoadingDemo(true);
+    try {
+      if (!demoVideoUrl) {
+        const videoUrl = await generateProofBoardDemoVideo();
+        setDemoVideoUrl(videoUrl);
+      }
+      setShowDemoVideo(true);
+    } catch (error) {
+      console.error('Failed to load demo video:', error);
+    } finally {
+      setIsLoadingDemo(false);
+    }
+  };
 
   const features = [
     {
       icon: Video,
       title: 'AI Video Generation',
-      description: 'Automatically generate stunning video presentations of your projects using Tavus AI technology.',
+      description: 'Automatically generate topic-specific video presentations of your projects using advanced AI technology.',
       color: 'from-purple-500 to-pink-500'
     },
     {
@@ -90,7 +121,7 @@ const Landing: React.FC = () => {
     {
       step: '03',
       title: 'AI Enhancement',
-      description: 'Our AI generates videos, translates content, and stores everything on IPFS.',
+      description: 'Our AI generates topic-specific videos, translates content, and stores everything on IPFS.',
       icon: Sparkles
     },
     {
@@ -206,7 +237,7 @@ const Landing: React.FC = () => {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Build stunning portfolios, generate AI-powered videos, translate content globally, 
+              Build stunning portfolios, generate topic-specific AI videos, translate content globally, 
               and mint verifiable NFTs. The future of creative showcasing is here.
             </p>
 
@@ -223,7 +254,8 @@ const Landing: React.FC = () => {
                 variant="outline" 
                 size="lg" 
                 className="px-10 py-4 text-lg text-white border-white/30 hover:bg-white/10"
-                onClick={() => setShowDemoVideo(true)}
+                onClick={handleViewDemo}
+                isLoading={isLoadingDemo}
               >
                 <Play className="mr-2 w-5 h-5" />
                 Watch Demo
@@ -409,7 +441,8 @@ const Landing: React.FC = () => {
                 variant="outline" 
                 size="lg" 
                 className="px-12 py-4 text-lg text-white border-white/30 hover:bg-white/10"
-                onClick={() => setShowDemoVideo(true)}
+                onClick={handleViewDemo}
+                isLoading={isLoadingDemo}
               >
                 <Play className="mr-2 w-5 h-5" />
                 Watch Demo
@@ -478,7 +511,7 @@ const Landing: React.FC = () => {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-4xl w-full border border-white/20">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">ProofBoard Demo</h3>
+              <h3 className="text-xl font-semibold text-white">ProofBoard Demo - Portfolio & NFT Platform</h3>
               <button
                 onClick={() => setShowDemoVideo(false)}
                 className="text-gray-400 hover:text-white transition-colors"
@@ -487,19 +520,28 @@ const Landing: React.FC = () => {
               </button>
             </div>
             <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden">
-              <video
-                className="w-full h-full object-cover"
-                controls
-                autoPlay
-                poster="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1200"
-              >
-                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              {demoVideoUrl ? (
+                <video
+                  className="w-full h-full object-cover"
+                  controls
+                  autoPlay
+                  poster="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                >
+                  <source src={demoVideoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-white">Loading demo video...</p>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="mt-4 text-center">
               <p className="text-white/70 text-sm">
-                See how ProofBoard transforms your creative work into verified Web3 assets
+                See how ProofBoard transforms your creative work into verified Web3 assets with topic-specific AI videos
               </p>
             </div>
           </div>

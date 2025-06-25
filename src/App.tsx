@@ -16,6 +16,7 @@ import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import ProjectDetails from './pages/ProjectDetails';
 import AddProject from './pages/AddProject';
+import CreatePost from './pages/CreatePost';
 import Analytics from './pages/Analytics';
 import Resume from './pages/Resume';
 import Premium from './pages/Premium';
@@ -168,6 +169,17 @@ const App: React.FC = () => {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <AddProject />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/create-post"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CreatePost />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }

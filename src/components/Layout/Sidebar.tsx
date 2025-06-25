@@ -12,7 +12,9 @@ import {
   LogOut,
   User,
   Bell,
-  Layers
+  Layers,
+  MessageCircle,
+  Edit3
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -24,7 +26,9 @@ const Sidebar: React.FC = () => {
     { path: '/dashboard', icon: Home, label: 'Home' },
     { path: '/dashboard/projects', icon: FolderOpen, label: 'My Projects' },
     { path: '/dashboard/add-project', icon: Plus, label: 'Add Project' },
+    { path: '/dashboard/create-post', icon: Edit3, label: 'Create Post' },
     { path: '/dashboard/explore', icon: Compass, label: 'Explore' },
+    { path: '/dashboard/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/dashboard/profile', icon: User, label: 'Profile' },
     { path: '/dashboard/resume', icon: FileText, label: 'Resume' },
     { path: '/dashboard/premium', icon: Crown, label: 'Premium' },

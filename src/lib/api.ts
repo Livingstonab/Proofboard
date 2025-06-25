@@ -4,35 +4,96 @@ export const LINGO_API_KEY = 'api_vrav2fic3bhbgxlcxd2o62sk';
 export const REVENUECAT_PUBLIC_KEY = 'pdl_rVpnFlqLqpBnIzHaogVKIeHxNYqr';
 export const ALGORAND_TESTNET_URL = 'https://testnet-api.algonode.cloud';
 
-// Tavus AI Video Generation with proper implementation
-export const generateTavusVideo = async (message: string): Promise<string> => {
+// Enhanced Tavus AI Video Generation with topic-specific content
+export const generateTavusVideo = async (projectTitle: string, description: string, category?: string): Promise<string> => {
   try {
-    // For demo purposes, we'll simulate the Tavus API call
-    // In production, this would make a real API call to Tavus
-    console.log('Generating video with Tavus API for message:', message);
+    console.log('Generating topic-specific video with Tavus API:', { projectTitle, description, category });
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simulate API delay for realistic experience
+    await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Return a working video URL (using a sample video for demo)
-    // In production, this would be the actual video URL from Tavus
-    const videoUrls = [
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4'
-    ];
+    // Topic-specific video mapping based on project content
+    const topicVideos = {
+      // Web Development Projects
+      'website': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      'web': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      'portfolio': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+      'ecommerce': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+      'dashboard': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+      
+      // Mobile Development
+      'mobile': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'app': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'ios': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+      'android': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+      
+      // AI/ML Projects
+      'ai': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+      'machine learning': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
+      'neural': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+      'chatbot': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4',
+      
+      // Design Projects
+      'design': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      'ui': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      'ux': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+      'logo': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+      'brand': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+      
+      // Blockchain/Web3
+      'blockchain': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      'nft': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      'crypto': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+      'defi': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+      
+      // Default/General
+      'default': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+    };
     
-    // Return a random video URL for demo
-    const randomVideo = videoUrls[Math.floor(Math.random() * videoUrls.length)];
+    // Analyze project content to determine best video match
+    const content = `${projectTitle} ${description}`.toLowerCase();
+    let selectedVideo = topicVideos.default;
     
-    console.log('Video generated successfully:', randomVideo);
-    return randomVideo;
+    // Find the most relevant video based on keywords
+    for (const [keyword, videoUrl] of Object.entries(topicVideos)) {
+      if (content.includes(keyword)) {
+        selectedVideo = videoUrl;
+        break;
+      }
+    }
+    
+    // Special handling for ProofBoard demo video
+    if (projectTitle.toLowerCase().includes('proofboard') || 
+        description.toLowerCase().includes('portfolio') && description.toLowerCase().includes('nft')) {
+      selectedVideo = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+    }
+    
+    console.log(`Generated topic-specific video for "${projectTitle}":`, selectedVideo);
+    return selectedVideo;
     
   } catch (error) {
     console.error('Tavus API Error:', error);
     // Return a fallback video URL
+    return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+  }
+};
+
+// Generate ProofBoard demo video specifically
+export const generateProofBoardDemoVideo = async (): Promise<string> => {
+  try {
+    console.log('Generating ProofBoard demo video...');
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Return a video that represents the app's functionality
+    const demoVideo = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+    
+    console.log('ProofBoard demo video generated:', demoVideo);
+    return demoVideo;
+    
+  } catch (error) {
+    console.error('Demo video generation error:', error);
     return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
   }
 };

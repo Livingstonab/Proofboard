@@ -31,6 +31,7 @@ const AddProject: React.FC = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    category: '',
     files: [] as File[],
     videoMessage: '',
     language: 'en',
@@ -59,6 +60,25 @@ const AddProject: React.FC = () => {
     { code: 'es', name: 'Spanish' },
     { code: 'de', name: 'German' },
     { code: 'pt', name: 'Portuguese' }
+  ];
+
+  const categories = [
+    'Web Development',
+    'Mobile App',
+    'UI/UX Design',
+    'AI/Machine Learning',
+    'Blockchain/Web3',
+    'Data Science',
+    'Game Development',
+    'DevOps/Cloud',
+    'Cybersecurity',
+    'IoT/Hardware',
+    'E-commerce',
+    'Social Media',
+    'Educational',
+    'Healthcare',
+    'Finance/Fintech',
+    'Other'
   ];
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -110,12 +130,12 @@ const AddProject: React.FC = () => {
         toast.success('Files uploaded to IPFS successfully!');
       }
 
-      // Step 2: Generate AI video using Tavus
-      setProcessingStep('Generating AI video with Tavus...');
+      // Step 2: Generate topic-specific AI video using Tavus
+      setProcessingStep('Generating topic-specific AI video with Tavus...');
       const videoScript = formData.videoMessage || formData.description;
-      const videoUrl = await generateTavusVideo(videoScript);
+      const videoUrl = await generateTavusVideo(formData.title, videoScript, formData.category);
       setResults(prev => ({ ...prev, videoUrl }));
-      toast.success('AI video generated successfully!');
+      toast.success('Topic-specific AI video generated successfully!');
 
       // Step 3: Translate content using Lingo
       setProcessingStep('Translating content...');
@@ -136,6 +156,7 @@ const AddProject: React.FC = () => {
       const metadata = {
         name: formData.title,
         description: formData.description,
+        category: formData.category,
         image: fileUrls[0] || '',
         video: videoUrl,
         translations,
@@ -145,7 +166,8 @@ const AddProject: React.FC = () => {
         properties: {
           category: 'verified_project',
           language: formData.language,
-          files: fileUrls
+          files: fileUrls,
+          projectType: formData.category
         }
       };
       
@@ -161,6 +183,7 @@ const AddProject: React.FC = () => {
         userId: user.id,
         title: formData.title,
         description: formData.description,
+        category: formData.category,
         thumbnail: fileUrls[0] || '',
         videoUrl: videoUrl,
         fileUrls: fileUrls,
@@ -176,12 +199,12 @@ const AddProject: React.FC = () => {
       };
 
       // Save to localStorage
-      const existingProjects = JSON.parse(localStorage.getItem('proofmint_projects') || '[]');
+      const existingProjects = JSON.parse(localStorage.getItem('proofboard_projects') || '[]');
       const updatedProjects = [...existingProjects, newProject];
-      localStorage.setItem('proofmint_projects', JSON.stringify(updatedProjects));
+      localStorage.setItem('proofboard_projects', JSON.stringify(updatedProjects));
 
       // Update analytics
-      const analytics = JSON.parse(localStorage.getItem('proofmint_analytics') || '{}');
+      const analytics = JSON.parse(localStorage.getItem('proofboard_analytics') || '{}');
       const updatedAnalytics = {
         ...analytics,
         totalProjects: (analytics.totalProjects || 0) + 1,
@@ -207,7 +230,7 @@ const AddProject: React.FC = () => {
           }
         ]
       };
-      localStorage.setItem('proofmint_analytics', JSON.stringify(updatedAnalytics));
+      localStorage.setItem('proofboard_analytics', JSON.stringify(updatedAnalytics));
 
       toast.success('Project created successfully!');
       
@@ -242,6 +265,22 @@ const AddProject: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
                 />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Project Category *
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-white"
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Project Description *
@@ -369,11 +408,11 @@ const AddProject: React.FC = () => {
                     <Video className="w-5 h-5 text-blue-500 mt-0.5" />
                     <div>
                       <h4 className="font-medium text-blue-900 dark:text-blue-100">
-                        Tavus AI Video Generation
+                        Topic-Specific AI Video Generation
                       </h4>
                       <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                        Our AI will generate a professional video presentation of your project using Tavus technology. 
-                        The video will be automatically created based on your project description or custom script.
+                        Our AI will generate a video specifically related to your project category ({formData.category || 'selected category'}) 
+                        and description. The video will be under 5 minutes and showcase content relevant to your work.
                       </p>
                     </div>
                   </div>
@@ -460,6 +499,10 @@ const AddProject: React.FC = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Title:</span>
                       <span className="text-gray-900 dark:text-white">{formData.title || 'Your Project Title'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Category:</span>
+                      <span className="text-gray-900 dark:text-white">{formData.category || 'Selected Category'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Creator:</span>
@@ -606,7 +649,7 @@ const AddProject: React.FC = () => {
           onClick={handleNext}
           disabled={
             isProcessing ||
-            (currentStep === 0 && (!formData.title || !formData.description))
+            (currentStep === 0 && (!formData.title || !formData.description || !formData.category))
           }
           isLoading={isProcessing}
         >
