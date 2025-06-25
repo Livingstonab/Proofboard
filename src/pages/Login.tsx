@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Crown, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Layers, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
@@ -23,8 +23,8 @@ const Login: React.FC = () => {
       await login(email, password);
       toast.success('Welcome back!');
       navigate('/dashboard');
-    } catch (error) {
-      toast.error('Invalid credentials. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Invalid credentials. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -42,9 +42,9 @@ const Login: React.FC = () => {
         >
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <Crown className="w-7 h-7 text-white" />
+              <Layers className="w-7 h-7 text-white" />
             </div>
-            <span className="text-3xl font-bold">ProofMint</span>
+            <span className="text-3xl font-bold">ProofBoard</span>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold mb-6">

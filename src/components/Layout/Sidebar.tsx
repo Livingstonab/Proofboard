@@ -11,7 +11,8 @@ import {
   Settings, 
   LogOut,
   User,
-  Bell
+  Bell,
+  Layers
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -37,10 +38,10 @@ const Sidebar: React.FC = () => {
       <div className="p-6">
         <div className="flex items-center space-x-2 mb-8">
           <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-            <Crown className="w-5 h-5 text-white" />
+            <Layers className="w-5 h-5 text-white" />
           </div>
           <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            ProofMint
+            ProofBoard
           </span>
         </div>
 

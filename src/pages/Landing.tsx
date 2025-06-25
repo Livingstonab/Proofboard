@@ -21,7 +21,8 @@ import {
   Zap,
   Award,
   Target,
-  Palette
+  Palette,
+  Layers
 } from 'lucide-react';
 import Button from '../components/UI/Button';
 import FloatingContactButtons from '../components/FloatingContactButtons';
@@ -104,7 +105,7 @@ const Landing: React.FC = () => {
       name: 'Sarah Chen',
       role: 'Full Stack Developer',
       avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150',
-      content: 'ProofMint transformed how I showcase my work. The AI videos and NFT verification give my portfolio a professional edge that clients love.',
+      content: 'ProofBoard transformed how I showcase my work. The AI videos and NFT verification give my portfolio a professional edge that clients love.',
       rating: 5
     },
     {
@@ -152,9 +153,9 @@ const Landing: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <Crown className="w-6 h-6 text-white" />
+                <Layers className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-white">ProofMint</span>
+              <span className="text-2xl font-bold text-white">ProofBoard</span>
             </div>
             
             <div className="hidden md:flex items-center space-x-8">
@@ -344,7 +345,7 @@ const Landing: React.FC = () => {
               Loved by Creators Worldwide
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Join thousands of professionals who have transformed their portfolios with ProofMint.
+              Join thousands of professionals who have transformed their portfolios with ProofBoard.
             </p>
           </motion.div>
 
@@ -424,9 +425,9 @@ const Landing: React.FC = () => {
             <div className="md:col-span-2">
               <div className="flex items-center space-x-2 mb-6">
                 <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                  <Crown className="w-6 h-6 text-white" />
+                  <Layers className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-white">ProofMint</span>
+                <span className="text-2xl font-bold text-white">ProofBoard</span>
               </div>
               <p className="text-gray-300 mb-6 max-w-md">
                 Your All-In-One Web3 Portfolio App. Showcase your work, mint NFTs, share resumes, and more.
@@ -466,7 +467,7 @@ const Landing: React.FC = () => {
           </div>
           
           <div className="pt-8 border-t border-white/20 text-center text-gray-400">
-            <p>&copy; 2025 ProofMint. All rights reserved. Built for creators, by creators.</p>
+            <p>&copy; 2025 ProofBoard. All rights reserved. Built for creators, by creators.</p>
           </div>
         </div>
       </footer>
@@ -476,7 +477,7 @@ const Landing: React.FC = () => {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-4xl w-full border border-white/20">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">ProofMint Demo</h3>
+              <h3 className="text-xl font-semibold text-white">ProofBoard Demo</h3>
               <button
                 onClick={() => setShowDemoVideo(false)}
                 className="text-gray-400 hover:text-white transition-colors"
@@ -488,7 +489,7 @@ const Landing: React.FC = () => {
               <div className="text-center">
                 <Play className="w-16 h-16 text-white/50 mx-auto mb-4" />
                 <p className="text-white/70">Demo video would be embedded here</p>
-                <p className="text-white/50 text-sm mt-2">Showcasing ProofMint's features and workflow</p>
+                <p className="text-white/50 text-sm mt-2">Showcasing ProofBoard's features and workflow</p>
               </div>
             </div>
           </div>

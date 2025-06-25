@@ -23,6 +23,7 @@ import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Explore from './pages/Explore';
 import Notifications from './pages/Notifications';
+import Chat from './pages/Chat';
 
 // Onboarding Components
 import OnboardingModal from './components/Onboarding/OnboardingModal';
@@ -57,7 +58,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
   React.useEffect(() => {
     if (user) {
       // Check if user has completed onboarding
-      const savedOnboarding = localStorage.getItem('proofmint_onboarding');
+      const savedOnboarding = localStorage.getItem('proofboard_onboarding');
       const hasCompletedOnboarding = savedOnboarding && JSON.parse(savedOnboarding).userId === user.id;
       
       if (!hasCompletedOnboarding) {
@@ -244,6 +245,17 @@ const App: React.FC = () => {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <Notifications />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/chat"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <Chat />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }

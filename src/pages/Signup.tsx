@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Crown, Mail, Lock, User, Eye, EyeOff, AtSign } from 'lucide-react';
+import { Layers, Mail, Lock, User, Eye, EyeOff, AtSign } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
@@ -44,8 +44,8 @@ const Signup: React.FC = () => {
       await signup(formData.email, formData.password, formData.name, formData.username);
       toast.success('Account created successfully!');
       navigate('/dashboard');
-    } catch (error) {
-      toast.error('Failed to create account. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create account. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -63,9 +63,9 @@ const Signup: React.FC = () => {
         >
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <Crown className="w-7 h-7 text-white" />
+              <Layers className="w-7 h-7 text-white" />
             </div>
-            <span className="text-3xl font-bold">ProofMint</span>
+            <span className="text-3xl font-bold">ProofBoard</span>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
