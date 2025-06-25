@@ -10,7 +10,8 @@ import {
   BarChart3, 
   Settings, 
   LogOut,
-  User
+  User,
+  Bell
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -27,6 +28,7 @@ const Sidebar: React.FC = () => {
     { path: '/dashboard/resume', icon: FileText, label: 'Resume' },
     { path: '/dashboard/premium', icon: Crown, label: 'Premium' },
     { path: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
+    { path: '/dashboard/notifications', icon: Bell, label: 'Notifications' },
     { path: '/dashboard/settings', icon: Settings, label: 'Settings' },
   ];
 

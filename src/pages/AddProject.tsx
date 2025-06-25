@@ -10,7 +10,9 @@ import {
   Shield, 
   CheckCircle,
   FileText,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader,
+  AlertCircle
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import Button from '../components/UI/Button';
@@ -18,16 +20,20 @@ import Input from '../components/UI/Input';
 import Card from '../components/UI/Card';
 import toast from 'react-hot-toast';
 import { generateTavusVideo, translateText, mintNFT, uploadToIPFS } from '../lib/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const AddProject: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     files: [] as File[],
     videoMessage: '',
+    language: 'en',
     isPublic: true,
   });
 
@@ -36,14 +42,23 @@ const AddProject: React.FC = () => {
     translations: {} as Record<string, { title: string; description: string }>,
     nftId: '',
     txId: '',
+    ipfsUrls: [] as string[]
   });
 
   const steps = [
     { title: 'Project Details', icon: FileText },
     { title: 'File Upload', icon: Upload },
-    { title: 'AI Video', icon: Video },
-    { title: 'Translation', icon: Globe },
-    { title: 'NFT Minting', icon: Shield },
+    { title: 'AI Video Generation', icon: Video },
+    { title: 'Multi-Language Translation', icon: Globe },
+    { title: 'NFT Minting & Verification', icon: Shield },
+  ];
+
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'fr', name: 'French' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'de', name: 'German' },
+    { code: 'pt', name: 'Portuguese' }
   ];
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -75,64 +90,130 @@ const AddProject: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (!user) {
+      toast.error('Please log in to create a project');
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
       // Step 1: Upload files to IPFS
       let fileUrls: string[] = [];
       if (formData.files.length > 0) {
-        toast.loading('Uploading files to IPFS...');
+        setProcessingStep('Uploading files to IPFS...');
         for (const file of formData.files) {
           const url = await uploadToIPFS(file);
           fileUrls.push(url);
         }
-        toast.dismiss();
-        toast.success('Files uploaded successfully!');
+        setResults(prev => ({ ...prev, ipfsUrls: fileUrls }));
+        toast.success('Files uploaded to IPFS successfully!');
       }
 
-      // Step 2: Generate AI video
-      toast.loading('Generating AI video...');
-      const videoUrl = await generateTavusVideo(formData.videoMessage || formData.description);
+      // Step 2: Generate AI video using Tavus
+      setProcessingStep('Generating AI video with Tavus...');
+      const videoScript = formData.videoMessage || formData.description;
+      const videoUrl = await generateTavusVideo(videoScript);
       setResults(prev => ({ ...prev, videoUrl }));
-      toast.dismiss();
-      toast.success('AI video generated!');
+      toast.success('AI video generated successfully!');
 
-      // Step 3: Translate content
-      toast.loading('Translating content...');
-      const languages = ['fr', 'es'];
+      // Step 3: Translate content using Lingo
+      setProcessingStep('Translating content...');
+      const targetLanguages = ['fr', 'es'];
       const translations: Record<string, { title: string; description: string }> = {};
       
-      for (const lang of languages) {
+      for (const lang of targetLanguages) {
         translations[lang] = {
           title: await translateText(formData.title, lang),
           description: await translateText(formData.description, lang),
         };
       }
       setResults(prev => ({ ...prev, translations }));
-      toast.dismiss();
-      toast.success('Content translated!');
+      toast.success('Content translated successfully!');
 
-      // Step 4: Mint NFT
-      toast.loading('Minting NFT on Algorand...');
+      // Step 4: Mint NFT on Algorand
+      setProcessingStep('Minting NFT on Algorand blockchain...');
       const metadata = {
         name: formData.title,
         description: formData.description,
         image: fileUrls[0] || '',
         video: videoUrl,
         translations,
-        creator: 'ProofMint User',
+        creator: user.name,
+        creatorId: user.id,
         timestamp: new Date().toISOString(),
+        properties: {
+          category: 'verified_project',
+          language: formData.language,
+          files: fileUrls
+        }
       };
       
       const txId = await mintNFT(metadata);
-      setResults(prev => ({ ...prev, nftId: `NFT-${Date.now()}`, txId }));
-      toast.dismiss();
+      const nftId = `NFT-${Date.now()}`;
+      setResults(prev => ({ ...prev, nftId, txId }));
       toast.success('NFT minted successfully!');
 
-      // Final success
+      // Step 5: Save project to localStorage
+      setProcessingStep('Saving project...');
+      const newProject = {
+        id: Date.now().toString(),
+        userId: user.id,
+        title: formData.title,
+        description: formData.description,
+        thumbnail: fileUrls[0] || '',
+        videoUrl: videoUrl,
+        fileUrls: fileUrls,
+        nftId: nftId,
+        algorandTxId: txId,
+        translations: translations,
+        language: formData.language,
+        isPublic: formData.isPublic,
+        views: 0,
+        likes: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Save to localStorage
+      const existingProjects = JSON.parse(localStorage.getItem('proofmint_projects') || '[]');
+      const updatedProjects = [...existingProjects, newProject];
+      localStorage.setItem('proofmint_projects', JSON.stringify(updatedProjects));
+
+      // Update analytics
+      const analytics = JSON.parse(localStorage.getItem('proofmint_analytics') || '{}');
+      const updatedAnalytics = {
+        ...analytics,
+        totalProjects: (analytics.totalProjects || 0) + 1,
+        videosGenerated: (analytics.videosGenerated || 0) + 1,
+        nftsMinted: (analytics.nftsMinted || 0) + 1,
+        languagesUsed: [...new Set([...(analytics.languagesUsed || []), formData.language])],
+        recentActivity: [
+          ...(analytics.recentActivity || []).slice(0, 9),
+          {
+            type: 'project_created',
+            message: `Created project "${formData.title}"`,
+            timestamp: new Date().toISOString()
+          },
+          {
+            type: 'video_generated',
+            message: `AI video generated for "${formData.title}"`,
+            timestamp: new Date().toISOString()
+          },
+          {
+            type: 'nft_minted',
+            message: `NFT minted for "${formData.title}"`,
+            timestamp: new Date().toISOString()
+          }
+        ]
+      };
+      localStorage.setItem('proofmint_analytics', JSON.stringify(updatedAnalytics));
+
       toast.success('Project created successfully!');
+      
+      // Navigate to project details
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate(`/dashboard/projects/${newProject.id}`);
       }, 2000);
 
     } catch (error) {
@@ -140,6 +221,7 @@ const AddProject: React.FC = () => {
       toast.error('Failed to create project. Please try again.');
     } finally {
       setIsProcessing(false);
+      setProcessingStep('');
     }
   };
 
@@ -154,7 +236,7 @@ const AddProject: React.FC = () => {
               </h3>
               <div className="space-y-4">
                 <Input
-                  label="Project Title"
+                  label="Project Title *"
                   placeholder="Enter your project title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -162,7 +244,7 @@ const AddProject: React.FC = () => {
                 />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Project Description
+                    Project Description *
                   </label>
                   <textarea
                     className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
@@ -173,6 +255,20 @@ const AddProject: React.FC = () => {
                     required
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Primary Language
+                  </label>
+                  <select
+                    value={formData.language}
+                    onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                    className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white"
+                  >
+                    {languages.map(lang => (
+                      <option key={lang.code} value={lang.code}>{lang.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -182,7 +278,7 @@ const AddProject: React.FC = () => {
                     className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                   />
                   <label htmlFor="isPublic" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    Make this project public in my portfolio
+                    Make this project public in my portfolio and explore page
                   </label>
                 </div>
               </div>
@@ -258,12 +354,12 @@ const AddProject: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Video Message (Optional)
+                    Custom Video Script (Optional)
                   </label>
                   <textarea
                     className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
                     rows={3}
-                    placeholder="Enter a custom message for your AI video, or we'll use your project description..."
+                    placeholder="Enter a custom script for your AI video, or we'll use your project description..."
                     value={formData.videoMessage}
                     onChange={(e) => setFormData({ ...formData, videoMessage: e.target.value })}
                   />
@@ -273,10 +369,11 @@ const AddProject: React.FC = () => {
                     <Video className="w-5 h-5 text-blue-500 mt-0.5" />
                     <div>
                       <h4 className="font-medium text-blue-900 dark:text-blue-100">
-                        AI Video Preview
+                        Tavus AI Video Generation
                       </h4>
                       <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                        Our AI will generate a professional video presentation of your project using advanced technology.
+                        Our AI will generate a professional video presentation of your project using Tavus technology. 
+                        The video will be automatically created based on your project description or custom script.
                       </p>
                     </div>
                   </div>
@@ -291,17 +388,18 @@ const AddProject: React.FC = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Multi-language Translation
+                Multi-Language Translation
               </h3>
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
                 <div className="flex items-start space-x-3">
                   <Globe className="w-5 h-5 text-green-500 mt-0.5" />
                   <div>
                     <h4 className="font-medium text-green-900 dark:text-green-100">
-                      Automatic Translation
+                      Lingo API Translation
                     </h4>
                     <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                      Your project will be automatically translated into French and Spanish to reach a global audience.
+                      Your project title and description will be automatically translated into French and Spanish 
+                      using Lingo API to reach a global audience.
                     </p>
                   </div>
                 </div>
@@ -310,19 +408,19 @@ const AddProject: React.FC = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-white/10 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                    <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center">
                       🇫🇷 French Translation
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Will be generated automatically using advanced AI translation
+                      Automatic translation to reach French-speaking audiences worldwide
                     </p>
                   </div>
                   <div className="bg-white/10 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                    <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center">
                       🇪🇸 Spanish Translation
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Will be generated automatically using advanced AI translation
+                      Automatic translation to reach Spanish-speaking audiences worldwide
                     </p>
                   </div>
                 </div>
@@ -336,17 +434,18 @@ const AddProject: React.FC = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                NFT Minting & Verification
+                NFT Minting & Blockchain Verification
               </h3>
               <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 mb-4">
                 <div className="flex items-start space-x-3">
                   <Shield className="w-5 h-5 text-purple-500 mt-0.5" />
                   <div>
                     <h4 className="font-medium text-purple-900 dark:text-purple-100">
-                      Blockchain Verification
+                      Algorand Blockchain Verification
                     </h4>
                     <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
-                      Your project will be minted as an NFT on the Algorand blockchain for permanent proof of authenticity and ownership.
+                      Your project will be minted as an NFT on the Algorand blockchain using ARC3 standard 
+                      for permanent proof of authenticity and ownership.
                     </p>
                   </div>
                 </div>
@@ -364,7 +463,7 @@ const AddProject: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Creator:</span>
-                      <span className="text-gray-900 dark:text-white">ProofMint User</span>
+                      <span className="text-gray-900 dark:text-white">{user?.name}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Blockchain:</span>
@@ -373,6 +472,10 @@ const AddProject: React.FC = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Standard:</span>
                       <span className="text-gray-900 dark:text-white">ARC3</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Files:</span>
+                      <span className="text-gray-900 dark:text-white">{formData.files.length} file(s)</span>
                     </div>
                   </div>
                 </div>
@@ -393,15 +496,16 @@ const AddProject: React.FC = () => {
         <button
           onClick={() => navigate('/dashboard')}
           className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-4"
+          disabled={isProcessing}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
         </button>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Add New Project
+          Create New Project
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Create and verify your project with AI-powered features and blockchain authentication.
+          Build and verify your project with AI-powered features and blockchain authentication.
         </p>
       </div>
 
@@ -450,6 +554,29 @@ const AddProject: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Processing Overlay */}
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <Card className="p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <Loader className="w-12 h-12 text-purple-500 mx-auto mb-4 animate-spin" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Creating Your Project
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                {processingStep}
+              </p>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Step Content */}
       <Card className="p-8 mb-8">

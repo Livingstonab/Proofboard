@@ -22,6 +22,7 @@ import Premium from './pages/Premium';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Explore from './pages/Explore';
+import Notifications from './pages/Notifications';
 
 // Onboarding Components
 import OnboardingModal from './components/Onboarding/OnboardingModal';
@@ -232,6 +233,17 @@ const App: React.FC = () => {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <Explore />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/notifications"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <Notifications />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
