@@ -182,7 +182,7 @@ const AddProject: React.FC = () => {
       setResults(prev => ({ ...prev, nftId, txId }));
       toast.success('NFT minted successfully!');
 
-      // Step 5: Save project to localStorage
+      // Step 5: Save project to localStorage with proper key
       setProcessingStep('Saving project...');
       const newProject = {
         id: Date.now().toString(),
@@ -204,7 +204,7 @@ const AddProject: React.FC = () => {
         updatedAt: new Date().toISOString(),
       };
 
-      // Save to localStorage with proper key
+      // Save to localStorage with correct key
       const existingProjects = JSON.parse(localStorage.getItem('proofboard_projects') || '[]');
       const updatedProjects = [...existingProjects, newProject];
       localStorage.setItem('proofboard_projects', JSON.stringify(updatedProjects));

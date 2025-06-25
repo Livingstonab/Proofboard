@@ -28,7 +28,10 @@ import {
   Calendar,
   Award,
   TrendingUp,
-  FileText
+  FileText,
+  Plus,
+  Trash2,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/UI/Button';
@@ -182,6 +185,15 @@ const Profile: React.FC = () => {
     setProfileData({
       ...profileData,
       otherProjects: profileData.otherProjects.filter(p => p.id !== id)
+    });
+  };
+
+  const updateOtherProject = (id: string, field: string, value: string) => {
+    setProfileData({
+      ...profileData,
+      otherProjects: profileData.otherProjects.map(p => 
+        p.id === id ? { ...p, [field]: value } : p
+      )
     });
   };
 
@@ -573,6 +585,111 @@ const Profile: React.FC = () => {
               )}
             </Card>
 
+            {/* External Projects */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  External Projects ({profileData.otherProjects.length})
+                </h3>
+                {isOwnProfile && isEditing && (
+                  <Button size="sm" onClick={addOtherProject}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add External Project
+                  </Button>
+                )}
+              </div>
+
+              {profileData.otherProjects.length === 0 ? (
+                <div className="text-center py-12">
+                  <ExternalLink className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No external projects
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    {isOwnProfile ? 'Add links to your projects hosted on other platforms.' : 'This user hasn\'t added any external projects.'}
+                  </p>
+                  {isOwnProfile && isEditing && (
+                    <Button onClick={addOtherProject}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add External Project
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {profileData.otherProjects.map((project) => (
+                    <div key={project.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                      {isEditing ? (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Input
+                              label="Project Title"
+                              value={project.title}
+                              onChange={(e) => updateOtherProject(project.id, 'title', e.target.value)}
+                              placeholder="My Awesome Project"
+                            />
+                            <Input
+                              label="Project URL"
+                              value={project.url}
+                              onChange={(e) => updateOtherProject(project.id, 'url', e.target.value)}
+                              placeholder="https://github.com/username/project"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Description
+                            </label>
+                            <textarea
+                              className="w-full px-4 py-2 bg-white/20 dark:bg-gray-900/20 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+                              rows={2}
+                              value={project.description}
+                              onChange={(e) => updateOtherProject(project.id, 'description', e.target.value)}
+                              placeholder="Brief description of the project..."
+                            />
+                          </div>
+                          <div className="flex justify-end">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => removeOtherProject(project.id)}
+                              className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-semibold text-gray-900 dark:text-white">
+                              {project.title}
+                            </h4>
+                            {project.url && (
+                              <a
+                                href={project.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-purple-600 hover:text-purple-700 flex items-center text-sm"
+                              >
+                                <ExternalLink className="w-4 h-4 mr-1" />
+                                View
+                              </a>
+                            )}
+                          </div>
+                          {project.description && (
+                            <p className="text-gray-600 dark:text-gray-400 text-sm">
+                              {project.description}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+
             {/* Posts */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -612,6 +729,18 @@ const Profile: React.FC = () => {
                   {posts.slice(0, 3).map((post) => (
                     <div key={post.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                       <p className="text-gray-900 dark:text-white mb-2">{post.content}</p>
+                      {post.mediaUrls && post.mediaUrls.length > 0 && (
+                        <div className="grid grid-cols-2 gap-2 mb-3">
+                          {post.mediaUrls.slice(0, 4).map((url: string, index: number) => (
+                            <img
+                              key={index}
+                              src={url}
+                              alt={`Post media ${index + 1}`}
+                              className="w-full h-24 object-cover rounded"
+                            />
+                          ))}
+                        </div>
+                      )}
                       <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                         <div className="flex items-center space-x-4">
                           <span className="flex items-center">

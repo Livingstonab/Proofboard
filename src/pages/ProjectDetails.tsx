@@ -52,8 +52,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
   useEffect(() => {
     if (!id) return;
 
-    // Load project data
-    const savedProjects = localStorage.getItem('proofmint_projects');
+    // Load project data with correct localStorage key
+    const savedProjects = localStorage.getItem('proofboard_projects');
     if (savedProjects) {
       try {
         const projects: Project[] = JSON.parse(savedProjects);
@@ -67,7 +67,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
             const updatedProjects = projects.map(p => 
               p.id === id ? { ...p, views: p.views + 1 } : p
             );
-            localStorage.setItem('proofmint_projects', JSON.stringify(updatedProjects));
+            localStorage.setItem('proofboard_projects', JSON.stringify(updatedProjects));
             setProject({ ...foundProject, views: foundProject.views + 1 });
           }
           
@@ -87,14 +87,14 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
   const handleLike = () => {
     if (!project) return;
     
-    const savedProjects = localStorage.getItem('proofmint_projects');
+    const savedProjects = localStorage.getItem('proofboard_projects');
     if (savedProjects) {
       try {
         const projects: Project[] = JSON.parse(savedProjects);
         const updatedProjects = projects.map(p => 
           p.id === id ? { ...p, likes: isLiked ? p.likes - 1 : p.likes + 1 } : p
         );
-        localStorage.setItem('proofmint_projects', JSON.stringify(updatedProjects));
+        localStorage.setItem('proofboard_projects', JSON.stringify(updatedProjects));
         
         setProject({ ...project, likes: isLiked ? project.likes - 1 : project.likes + 1 });
         setIsLiked(!isLiked);
@@ -117,12 +117,12 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
   const handleDelete = () => {
     if (!project || !window.confirm('Are you sure you want to delete this project?')) return;
     
-    const savedProjects = localStorage.getItem('proofmint_projects');
+    const savedProjects = localStorage.getItem('proofboard_projects');
     if (savedProjects) {
       try {
         const projects: Project[] = JSON.parse(savedProjects);
         const updatedProjects = projects.filter(p => p.id !== id);
-        localStorage.setItem('proofmint_projects', JSON.stringify(updatedProjects));
+        localStorage.setItem('proofboard_projects', JSON.stringify(updatedProjects));
         toast.success('Project deleted successfully');
         navigate('/dashboard/projects');
       } catch (error) {
