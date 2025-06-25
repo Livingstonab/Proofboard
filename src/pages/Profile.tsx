@@ -27,7 +27,8 @@ import {
   Star,
   Calendar,
   Award,
-  TrendingUp
+  TrendingUp,
+  FileText
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/UI/Button';
