@@ -22,7 +22,8 @@ import {
   Award,
   Target,
   Palette,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
 import Button from '../components/UI/Button';
 import FloatingContactButtons from '../components/FloatingContactButtons';
@@ -482,15 +483,24 @@ const Landing: React.FC = () => {
                 onClick={() => setShowDemoVideo(false)}
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                ✕
+                <X className="w-6 h-6" />
               </button>
             </div>
-            <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <Play className="w-16 h-16 text-white/50 mx-auto mb-4" />
-                <p className="text-white/70">Demo video would be embedded here</p>
-                <p className="text-white/50 text-sm mt-2">Showcasing ProofBoard's features and workflow</p>
-              </div>
+            <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden">
+              <video
+                className="w-full h-full object-cover"
+                controls
+                autoPlay
+                poster="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1200"
+              >
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-white/70 text-sm">
+                See how ProofBoard transforms your creative work into verified Web3 assets
+              </p>
             </div>
           </div>
         </div>

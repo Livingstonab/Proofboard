@@ -22,7 +22,8 @@ import {
   Volume2,
   VolumeX,
   Maximize,
-  MoreHorizontal
+  MoreHorizontal,
+  CheckCircle
 } from 'lucide-react';
 import { Project } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -46,6 +47,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [videoError, setVideoError] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -128,6 +130,19 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
         toast.error('Failed to delete project');
       }
     }
+  };
+
+  const handleVideoPlay = () => {
+    setIsVideoPlaying(true);
+  };
+
+  const handleVideoPause = () => {
+    setIsVideoPlaying(false);
+  };
+
+  const handleVideoError = () => {
+    setVideoError(true);
+    toast.error('Failed to load video');
   };
 
   const isOwner = user && project && user.id === project.userId;
@@ -237,15 +252,39 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Media Section */}
+            {/* Video Section */}
             <Card className="overflow-hidden">
               <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 relative">
-                {project.thumbnail ? (
-                  <img
-                    src={project.thumbnail}
-                    alt={project.title}
+                {project.videoUrl && !videoError ? (
+                  <video
                     className="w-full h-full object-cover"
-                  />
+                    controls
+                    poster={project.thumbnail}
+                    onPlay={handleVideoPlay}
+                    onPause={handleVideoPause}
+                    onError={handleVideoError}
+                    muted={isMuted}
+                  >
+                    <source src={project.videoUrl} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : project.thumbnail ? (
+                  <div className="relative w-full h-full">
+                    <img
+                      src={project.thumbnail}
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <div className="text-center text-white">
+                        <Video className="w-16 h-16 mx-auto mb-4" />
+                        <p className="text-lg font-semibold mb-2">AI Video Generated</p>
+                        <p className="text-sm opacity-80">
+                          {videoError ? 'Video temporarily unavailable' : 'Click to play video'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
@@ -257,37 +296,15 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
                   </div>
                 )}
 
-                {/* Video Controls Overlay */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <div className="flex items-center space-x-4">
-                    <button
-                      onClick={() => setIsVideoPlaying(!isVideoPlaying)}
-                      className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
-                    >
-                      {isVideoPlaying ? (
-                        <Pause className="w-8 h-8 text-white" />
-                      ) : (
-                        <Play className="w-8 h-8 text-white ml-1" />
-                      )}
-                    </button>
+                {/* Video Status Badge */}
+                {project.videoUrl && (
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 bg-blue-500/20 backdrop-blur-sm text-blue-400 text-sm rounded-full flex items-center">
+                      <Video className="w-4 h-4 mr-1" />
+                      AI Generated
+                    </span>
                   </div>
-                </div>
-
-                {/* Video Controls */}
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => setIsMuted(!isMuted)}
-                      className="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-                    >
-                      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  
-                  <button className="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors">
-                    <Maximize className="w-4 h-4" />
-                  </button>
-                </div>
+                )}
               </div>
             </Card>
 
@@ -304,14 +321,18 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
             {/* Translations */}
             {project.translations && Object.keys(project.translations).length > 0 && (
               <Card className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Translations
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                  <Globe className="w-5 h-5 mr-2 text-blue-500" />
+                  Multi-Language Translations
                 </h2>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {Object.entries(project.translations).map(([lang, translation]) => (
-                    <div key={lang} className="border-l-4 border-purple-500 pl-4">
-                      <h3 className="font-medium text-gray-900 dark:text-white mb-1">
+                    <div key={lang} className="border-l-4 border-purple-500 pl-6 bg-purple-50 dark:bg-purple-900/20 rounded-r-lg p-4">
+                      <h3 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center">
                         {lang === 'fr' ? '🇫🇷 French' : '🇪🇸 Spanish'}
+                        <span className="ml-2 px-2 py-1 bg-green-500/20 text-green-600 text-xs rounded-full">
+                          AI Translated
+                        </span>
                       </h3>
                       <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
                         {translation.title}
@@ -332,13 +353,20 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
                   <Shield className="w-5 h-5 mr-2 text-green-500" />
                   Blockchain Verification
                 </h2>
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                    <span className="text-green-800 dark:text-green-200 font-semibold">
+                      Verified on Algorand Blockchain
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="text-sm font-medium text-green-800 dark:text-green-200">
                         NFT ID
                       </label>
-                      <p className="text-green-900 dark:text-green-100 font-mono text-sm">
+                      <p className="text-green-900 dark:text-green-100 font-mono text-sm break-all">
                         {project.nftId}
                       </p>
                     </div>
@@ -347,20 +375,30 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
                         <label className="text-sm font-medium text-green-800 dark:text-green-200">
                           Transaction ID
                         </label>
-                        <p className="text-green-900 dark:text-green-100 font-mono text-sm">
+                        <p className="text-green-900 dark:text-green-100 font-mono text-sm break-all">
                           {project.algorandTxId}
                         </p>
                       </div>
                     )}
                   </div>
-                  <div className="mt-4 flex items-center space-x-2">
-                    <Button size="sm" variant="outline">
+                  
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" className="border-green-500 text-green-600 hover:bg-green-500 hover:text-white">
                       <ExternalLink className="w-4 h-4 mr-2" />
                       View on Algorand
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" className="border-green-500 text-green-600 hover:bg-green-500 hover:text-white">
                       <Download className="w-4 h-4 mr-2" />
                       Download Certificate
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-green-500 text-green-600 hover:bg-green-500 hover:text-white"
+                      onClick={() => copyToClipboard(project.nftId || '')}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy NFT ID
                     </Button>
                   </div>
                 </div>
@@ -375,13 +413,13 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Creator
               </h3>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                   <User className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
-                    {user?.name || 'ProofMint Creator'}
+                    {user?.name || 'ProofBoard Creator'}
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     @{user?.username || 'creator'}
@@ -390,7 +428,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
               </div>
               
               {!isOwner && (
-                <div className="mt-4 space-y-2">
+                <div className="space-y-2">
                   <Button variant="outline" className="w-full">
                     <User className="w-4 h-4 mr-2" />
                     Follow Creator
@@ -433,6 +471,20 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
                     {project.nftId ? 'Verified' : 'Pending'}
                   </span>
                 </div>
+                {project.videoUrl && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">AI Video</span>
+                    <span className="font-medium text-blue-500">Generated</span>
+                  </div>
+                )}
+                {project.translations && Object.keys(project.translations).length > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Languages</span>
+                    <span className="font-medium text-purple-500">
+                      {Object.keys(project.translations).length + 1}
+                    </span>
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -454,6 +506,12 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Open in New Tab
                 </Button>
+                {project.videoUrl && (
+                  <Button variant="outline" className="w-full">
+                    <Video className="w-4 h-4 mr-2" />
+                    Download Video
+                  </Button>
+                )}
               </div>
             </Card>
           </div>
