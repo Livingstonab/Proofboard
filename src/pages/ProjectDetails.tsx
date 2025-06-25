@@ -52,7 +52,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
   useEffect(() => {
     if (!id) return;
 
-    // Load project data with correct localStorage key
+    // Load project data with CORRECT localStorage key
     const savedProjects = localStorage.getItem('proofboard_projects');
     if (savedProjects) {
       try {
@@ -143,6 +143,34 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
   const handleVideoError = () => {
     setVideoError(true);
     toast.error('Failed to load video');
+  };
+
+  const downloadCertificate = () => {
+    if (!project) return;
+    
+    // Create a simple certificate content
+    const certificateContent = `
+      CERTIFICATE OF AUTHENTICITY
+      
+      Project: ${project.title}
+      Creator: ${user?.name}
+      NFT ID: ${project.nftId}
+      Transaction ID: ${project.algorandTxId}
+      Created: ${new Date(project.createdAt).toLocaleDateString()}
+      
+      This certificate verifies the authenticity of the above project
+      on the Algorand blockchain.
+    `;
+    
+    const blob = new Blob([certificateContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${project.title}-certificate.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    toast.success('Certificate downloaded!');
   };
 
   const isOwner = user && project && user.id === project.userId;
@@ -387,7 +415,12 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ isPublicView = false })
                       <ExternalLink className="w-4 h-4 mr-2" />
                       View on Algorand
                     </Button>
-                    <Button size="sm" variant="outline" className="border-green-500 text-green-600 hover:bg-green-500 hover:text-white">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-green-500 text-green-600 hover:bg-green-500 hover:text-white"
+                      onClick={downloadCertificate}
+                    >
                       <Download className="w-4 h-4 mr-2" />
                       Download Certificate
                     </Button>

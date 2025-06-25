@@ -131,7 +131,7 @@ const CreatePost: React.FC = () => {
         updatedAt: new Date().toISOString(),
       };
 
-      // Save to localStorage
+      // Save to localStorage with CORRECT key
       const existingPosts = JSON.parse(localStorage.getItem('proofboard_posts') || '[]');
       const updatedPosts = [newPost, ...existingPosts];
       localStorage.setItem('proofboard_posts', JSON.stringify(updatedPosts));

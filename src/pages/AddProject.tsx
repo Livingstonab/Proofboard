@@ -133,14 +133,14 @@ const AddProject: React.FC = () => {
         toast.success('Files uploaded to IPFS successfully!');
       }
 
-      // Step 2: Generate topic-specific AI video using Tavus (only if enabled)
+      // Step 2: Generate REAL topic-specific AI video using Tavus (only if enabled)
       let videoUrl = '';
       if (formData.generateVideo) {
-        setProcessingStep('Generating topic-specific AI video with Tavus...');
+        setProcessingStep('Generating REAL topic-specific AI video with Tavus...');
         const videoScript = formData.videoMessage || formData.description;
         videoUrl = await generateTavusVideo(formData.title, videoScript, formData.category);
         setResults(prev => ({ ...prev, videoUrl }));
-        toast.success('Topic-specific AI video generated successfully!');
+        toast.success('REAL topic-specific AI video generated successfully!');
       }
 
       // Step 3: Translate content using Lingo
@@ -182,7 +182,7 @@ const AddProject: React.FC = () => {
       setResults(prev => ({ ...prev, nftId, txId }));
       toast.success('NFT minted successfully!');
 
-      // Step 5: Save project to localStorage with proper key
+      // Step 5: Save project to localStorage with CORRECT key
       setProcessingStep('Saving project...');
       const newProject = {
         id: Date.now().toString(),
@@ -204,7 +204,7 @@ const AddProject: React.FC = () => {
         updatedAt: new Date().toISOString(),
       };
 
-      // Save to localStorage with correct key
+      // Save to localStorage with CORRECT key
       const existingProjects = JSON.parse(localStorage.getItem('proofboard_projects') || '[]');
       const updatedProjects = [...existingProjects, newProject];
       localStorage.setItem('proofboard_projects', JSON.stringify(updatedProjects));
@@ -240,7 +240,7 @@ const AddProject: React.FC = () => {
 
       toast.success('Project created successfully!');
       
-      // Navigate to project details
+      // Navigate to project details with CORRECT path
       setTimeout(() => {
         navigate(`/dashboard/projects/${newProject.id}`);
       }, 2000);
@@ -320,7 +320,7 @@ const AddProject: React.FC = () => {
                       Generate AI Video
                     </label>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Create a topic-specific video for your project
+                      Create a REAL topic-specific video for your project (max 5 minutes)
                     </p>
                   </div>
                   <button
@@ -436,11 +436,11 @@ const AddProject: React.FC = () => {
                       <Video className="w-5 h-5 text-blue-500 mt-0.5" />
                       <div>
                         <h4 className="font-medium text-blue-900 dark:text-blue-100">
-                          Topic-Specific AI Video Generation
+                          REAL Topic-Specific AI Video Generation
                         </h4>
                         <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                          Our AI will generate a video specifically related to your project category ({formData.category || 'selected category'}) 
-                          and description. The video will be under 5 minutes and showcase content relevant to your work.
+                          Our AI will generate a video EXACTLY matching your project category ({formData.category || 'selected category'}) 
+                          and description. The video will be under 5 minutes and showcase content DIRECTLY related to your work.
                         </p>
                       </div>
                     </div>

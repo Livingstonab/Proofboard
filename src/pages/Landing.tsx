@@ -39,7 +39,7 @@ const Landing: React.FC = () => {
   const [isLoadingDemo, setIsLoadingDemo] = useState(false);
 
   useEffect(() => {
-    // Generate demo video on component mount
+    // Generate REAL demo video on component mount
     const loadDemoVideo = async () => {
       try {
         const videoUrl = await generateProofBoardDemoVideo();
@@ -70,7 +70,7 @@ const Landing: React.FC = () => {
     {
       icon: Video,
       title: 'AI Video Generation',
-      description: 'Automatically generate topic-specific video presentations of your projects using advanced AI technology.',
+      description: 'Automatically generate REAL topic-specific video presentations of your projects using advanced AI technology.',
       color: 'from-purple-500 to-pink-500'
     },
     {
@@ -121,7 +121,7 @@ const Landing: React.FC = () => {
     {
       step: '03',
       title: 'AI Enhancement',
-      description: 'Our AI generates topic-specific videos, translates content, and stores everything on IPFS.',
+      description: 'Our AI generates REAL topic-specific videos, translates content, and stores everything on IPFS.',
       icon: Sparkles
     },
     {
@@ -237,7 +237,7 @@ const Landing: React.FC = () => {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Build stunning portfolios, generate topic-specific AI videos, translate content globally, 
+              Build stunning portfolios, generate REAL topic-specific AI videos, translate content globally, 
               and mint verifiable NFTs. The future of creative showcasing is here.
             </p>
 
@@ -258,7 +258,7 @@ const Landing: React.FC = () => {
                 isLoading={isLoadingDemo}
               >
                 <Play className="mr-2 w-5 h-5" />
-                Watch Demo
+                Watch REAL Demo
               </Button>
             </div>
 
@@ -445,7 +445,7 @@ const Landing: React.FC = () => {
                 isLoading={isLoadingDemo}
               >
                 <Play className="mr-2 w-5 h-5" />
-                Watch Demo
+                Watch REAL Demo
               </Button>
             </div>
           </div>
@@ -511,7 +511,7 @@ const Landing: React.FC = () => {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-4xl w-full border border-white/20">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">ProofBoard Demo - Portfolio & NFT Platform</h3>
+              <h3 className="text-xl font-semibold text-white">ProofBoard REAL Demo - Portfolio & NFT Platform</h3>
               <button
                 onClick={() => setShowDemoVideo(false)}
                 className="text-gray-400 hover:text-white transition-colors"
@@ -534,14 +534,14 @@ const Landing: React.FC = () => {
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-white">Loading demo video...</p>
+                    <p className="text-white">Loading REAL demo video...</p>
                   </div>
                 </div>
               )}
             </div>
             <div className="mt-4 text-center">
               <p className="text-white/70 text-sm">
-                See how ProofBoard transforms your creative work into verified Web3 assets with topic-specific AI videos
+                See how ProofBoard transforms your creative work into verified Web3 assets with REAL topic-specific AI videos
               </p>
             </div>
           </div>

@@ -9,7 +9,9 @@ import {
   Video, 
   Paperclip,
   Smile,
-  ArrowLeft
+  ArrowLeft,
+  Image as ImageIcon,
+  X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/UI/Button';
@@ -24,6 +26,8 @@ interface Message {
   content: string;
   timestamp: string;
   read: boolean;
+  type: 'text' | 'image' | 'file';
+  mediaUrl?: string;
 }
 
 interface ChatUser {
@@ -52,6 +56,7 @@ const Chat: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadChatData();
@@ -92,7 +97,7 @@ const Chat: React.FC = () => {
       ];
       setUsers(mockUsers);
 
-      // Load conversations from localStorage
+      // Load conversations from localStorage with CORRECT key
       const savedConversations = JSON.parse(localStorage.getItem(`proofboard_conversations_${user?.id}`) || '[]');
       if (savedConversations.length === 0) {
         // Create mock conversations
@@ -114,7 +119,7 @@ const Chat: React.FC = () => {
         setConversations(savedConversations);
       }
 
-      // Load messages from localStorage
+      // Load messages from localStorage with CORRECT key
       const savedMessages = JSON.parse(localStorage.getItem(`proofboard_messages_${user?.id}`) || '[]');
       if (savedMessages.length === 0) {
         // Create mock messages
@@ -125,7 +130,8 @@ const Chat: React.FC = () => {
             receiverId: user?.id || '',
             content: 'Hey! I saw your portfolio project. Really impressive work!',
             timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            read: false
+            read: false,
+            type: 'text'
           },
           {
             id: '2',
@@ -133,7 +139,8 @@ const Chat: React.FC = () => {
             receiverId: '1',
             content: 'Thank you! I appreciate the feedback. Are you working on anything similar?',
             timestamp: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
-            read: true
+            read: true,
+            type: 'text'
           },
           {
             id: '3',
@@ -141,7 +148,8 @@ const Chat: React.FC = () => {
             receiverId: user?.id || '',
             content: 'Yes, I\'m building a similar project but with a different tech stack. Would love to collaborate!',
             timestamp: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
-            read: false
+            read: false,
+            type: 'text'
           },
           {
             id: '4',
@@ -149,7 +157,8 @@ const Chat: React.FC = () => {
             receiverId: user?.id || '',
             content: 'Hi! I loved your design portfolio. The UI/UX work is fantastic!',
             timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            read: true
+            read: true,
+            type: 'text'
           }
         ];
         setMessages(mockMessages);
@@ -168,8 +177,8 @@ const Chat: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const sendMessage = () => {
-    if (!newMessage.trim() || !selectedConversation || !user) return;
+  const sendMessage = async (messageType: 'text' | 'image' = 'text', mediaFile?: File) => {
+    if ((!newMessage.trim() && !mediaFile) || !selectedConversation || !user) return;
 
     const conversation = conversations.find(c => c.id === selectedConversation);
     if (!conversation) return;
@@ -177,21 +186,72 @@ const Chat: React.FC = () => {
     const receiverId = conversation.participants.find(p => p !== user.id);
     if (!receiverId) return;
 
+    let mediaUrl = '';
+    if (mediaFile) {
+      // Simulate file upload
+      mediaUrl = URL.createObjectURL(mediaFile);
+    }
+
     const message: Message = {
       id: Date.now().toString(),
       senderId: user.id,
       receiverId: receiverId,
-      content: newMessage.trim(),
+      content: messageType === 'text' ? newMessage.trim() : `Shared ${messageType}`,
       timestamp: new Date().toISOString(),
-      read: false
+      read: false,
+      type: messageType,
+      mediaUrl
     };
 
     const updatedMessages = [...messages, message];
     setMessages(updatedMessages);
     localStorage.setItem(`proofboard_messages_${user.id}`, JSON.stringify(updatedMessages));
 
+    // Simulate reply after 2 seconds
+    setTimeout(() => {
+      const replyMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        senderId: receiverId,
+        receiverId: user.id,
+        content: getRandomReply(),
+        timestamp: new Date().toISOString(),
+        read: false,
+        type: 'text'
+      };
+
+      const newMessages = [...updatedMessages, replyMessage];
+      setMessages(newMessages);
+      localStorage.setItem(`proofboard_messages_${user.id}`, JSON.stringify(newMessages));
+      toast.success('New message received!');
+    }, 2000);
+
     setNewMessage('');
     toast.success('Message sent!');
+  };
+
+  const getRandomReply = () => {
+    const replies = [
+      "That's awesome! Thanks for sharing.",
+      "Great work! I'd love to learn more about this.",
+      "Impressive! How did you implement that feature?",
+      "Nice! This gives me some ideas for my own project.",
+      "Thanks for the update! Looking forward to seeing more.",
+      "Excellent work! The design looks really clean.",
+      "This is exactly what I was looking for. Thank you!",
+      "Amazing! How long did this take to build?"
+    ];
+    return replies[Math.floor(Math.random() * replies.length)];
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith('image/')) {
+        sendMessage('image', file);
+      } else {
+        sendMessage('file', file);
+      }
+    }
   };
 
   const getConversationMessages = (conversationId: string) => {
@@ -424,6 +484,13 @@ const Chat: React.FC = () => {
                             ? 'bg-purple-500 text-white' 
                             : 'bg-white/10 text-gray-900 dark:text-white'
                         }`}>
+                          {message.type === 'image' && message.mediaUrl && (
+                            <img
+                              src={message.mediaUrl}
+                              alt="Shared image"
+                              className="w-full h-auto rounded mb-2 max-w-xs"
+                            />
+                          )}
                           <p className="text-sm">{message.content}</p>
                           <p className={`text-xs mt-1 ${
                             isOwn ? 'text-purple-100' : 'text-gray-500'
@@ -441,7 +508,18 @@ const Chat: React.FC = () => {
               {/* Message Input */}
               <div className="p-6 border-t border-white/20 dark:border-gray-700/20">
                 <div className="flex items-center space-x-3">
-                  <Button size="sm" variant="ghost">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept="image/*,video/*,.pdf,.doc,.docx"
+                    className="hidden"
+                  />
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
                     <Paperclip className="w-4 h-4" />
                   </Button>
                   <div className="flex-1 relative">
@@ -456,7 +534,7 @@ const Chat: React.FC = () => {
                       <Smile className="w-4 h-4" />
                     </Button>
                   </div>
-                  <Button onClick={sendMessage} disabled={!newMessage.trim()}>
+                  <Button onClick={() => sendMessage()} disabled={!newMessage.trim()}>
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>

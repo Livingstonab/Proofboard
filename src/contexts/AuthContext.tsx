@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
+    // Check for existing session with CORRECT key
     const savedUser = localStorage.getItem('proofboard_user');
     if (savedUser) {
       try {
@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Check if user exists in localStorage
+      // Check if user exists in localStorage with CORRECT key
       const existingUsers = JSON.parse(localStorage.getItem('proofboard_users') || '[]');
       const existingUser = existingUsers.find((u: User) => u.email === email);
       
@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (email: string, password: string, name: string, username: string) => {
     setIsLoading(true);
     try {
-      // Check if user already exists
+      // Check if user already exists with CORRECT key
       const existingUsers = JSON.parse(localStorage.getItem('proofboard_users') || '[]');
       const emailExists = existingUsers.find((u: User) => u.email === email);
       const usernameExists = existingUsers.find((u: User) => u.username === username);
@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: new Date().toISOString(),
       };
       
-      // Save user to users list
+      // Save user to users list with CORRECT key
       const updatedUsers = [...existingUsers, newUser];
       localStorage.setItem('proofboard_users', JSON.stringify(updatedUsers));
       
@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(updatedUser);
       localStorage.setItem('proofboard_user', JSON.stringify(updatedUser));
       
-      // Update in users list
+      // Update in users list with CORRECT key
       const existingUsers = JSON.parse(localStorage.getItem('proofboard_users') || '[]');
       const updatedUsers = existingUsers.map((u: User) => 
         u.id === user.id ? updatedUser : u

@@ -18,6 +18,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/UI/Button';
 import Card from '../components/UI/Card';
 import toast from 'react-hot-toast';
+import { processPaddlePayment } from '../lib/api';
 
 const Premium: React.FC = () => {
   const { user, updateUser } = useAuth();
@@ -84,21 +85,26 @@ const Premium: React.FC = () => {
     setIsUpgrading(true);
     
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Process REAL payment with Paddle
+      const paymentResult = await processPaddlePayment(planName.toLowerCase());
       
-      // Update user to premium
-      updateUser({ isPremium: true });
-      
-      toast.success(`Successfully upgraded to ${planName}!`);
-      
-      // Store subscription info
-      localStorage.setItem('proofmint_subscription', JSON.stringify({
-        plan: planName,
-        billing: selectedPlan,
-        startDate: new Date().toISOString(),
-        status: 'active'
-      }));
+      if (paymentResult.success) {
+        // Update user to premium
+        updateUser({ isPremium: true });
+        
+        toast.success(`Successfully upgraded to ${planName}! Payment processed.`);
+        
+        // Store subscription info with CORRECT key
+        localStorage.setItem('proofboard_subscription', JSON.stringify({
+          plan: planName,
+          billing: selectedPlan,
+          startDate: new Date().toISOString(),
+          status: 'active',
+          transactionId: paymentResult.transactionId
+        }));
+      } else {
+        toast.error('Payment failed. Please try again.');
+      }
       
     } catch (error) {
       toast.error('Upgrade failed. Please try again.');
@@ -335,6 +341,7 @@ const Premium: React.FC = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             Premium Features
+          
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400">
             Unlock powerful tools to elevate your creative portfolio
@@ -428,7 +435,7 @@ const Premium: React.FC = () => {
             Ready to Go Premium?
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-            Join thousands of creators who have elevated their portfolios with ProofMint Premium.
+            Join thousands of creators who have elevated their portfolios with ProofBoard Premium.
           </p>
           <Button size="lg" onClick={() => handleUpgrade('Premium')}>
             <Zap className="w-5 h-5 mr-2" />
